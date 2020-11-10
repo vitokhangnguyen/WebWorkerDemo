@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document 2</title>
+</head>
+<body>
+    <button id="w2" onclick="window.open('external.html', 'External', 'scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no')">
+        Open External
+    </button>
+    <p>Type Something Below</p>
+    <textarea id="myInput"></textarea>
+    <script>
+        let worker = new SharedWorker("worker.js");
+        worker.port.start();
+        let input = document.getElementById("myInput");
+        myInput.onkeyup = e => {
+            worker.port.postMessage(input.value);
+        };
+    </script>
+</body>
+</html>
