@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0" async defer></script>
+    <script src="/chart.js" async defer></script>
+    <style>
+        .chart-wrapper {
+            width: 50vw;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-wrapper">
+        <canvas id="myChart"></canvas>
+    </div>
+    <div class="key-wrapper">
+        Key:
+        <input id="Key" />
+    </div>
+    <div class="value-wrapper">
+        Value 1:
+        <input id="Value1" />
+        <input type="color" id="Color1" value="#FF6699" />
+        <br>
+        Value 2:
+        <input id="Value2" />
+        <input type="color" id="Color2" value="#0091FF" />
+    </div>
+    <button id="AddBtn">Add value</button>
+</body>
+</html>
