@@ -1,23 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document 2</title>
+    <title>Document</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 </head>
-<body>
-    <button id="w2" onclick="window.open('external.html', 'External', 'scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no')">
-        Open External
-    </button>
-    <p>Type Something Below</p>
-    <textarea id="myInput"></textarea>
-    <script>
-        let worker = new SharedWorker("worker.js");
-        worker.port.start();
-        let input = document.getElementById("myInput");
-        myInput.onkeyup = e => {
-            worker.port.postMessage(input.value);
-        };
+
+<body onload="loadData()" style="min-height: 100%;">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- Navbar content -->
+        <a class="navbar-brand" href="/">DPS921 Assignment</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Dedicated Workers <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/shared.html">Shared Workers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/libraries.html">Parallel.js</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <!-- Header -->
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-8">
+                    <!-- Page Description -->
+                    <h1 class="display-3">Dedicated Workers</h1>
+                    <p class="lead">Workers are useful for allowing your code to perform CPU intensive calculations
+                        without blocking or freezing the main thread from executing other JavaScriptCode.
+                        <br>A dedicated workeris only accessible by the script that called it.</p>
+                </div>
+                <!-- Concurrency Card -->
+                <div class="col-4 d-flex justify-content-center">
+                    <div class="card" style="width: 20rem;" data-toggle="tooltip" data-placement="left"
+                        title="The number of logical processors available to run threads on your computer. This value will differ based on browsers & their configurations.">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">Your Hardware Concurrency</h5>
+                            <h1 class="display-3 text-center" id="hardwareConcurrency">2</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction -->
+    <div class="container">
+        <p>
+            In this example, we are going to apply a Sobel filter to the following 4K image. A Sobel filter is used in
+            image processing and computer vision, where an image is generated with the edges emphasized of the input
+            image. Firstly, we will execute the serial code - then we are going to perform the same operation using
+            multiple web workers set by an input. When running the serial version, try interacting with the DOM!
+        </p>
+    </div>
+
+    <!-- Serial Image -->
+    <div class="container-fluid">
+        <h1>Serial Conversion</h1>
+        <div class="row">
+            <div class="col-6">
+                <h3>Initial Image</h3>
+                <div style="overflow: scroll; height: 720px;">
+                    <img id="imageSource" src="wallpaper.jpg" />
+                </div>
+            </div>
+            <div class="col-6">
+                <h3>Sobel Filtered Image</h3>
+                <div style="overflow: scroll; height: 720px;">
+                    <canvas id="serialCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="mt-5 d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" onclick="performSerialSobel()">
+                <h4>Filter Image</h4>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h3>Results: <span id="serialResults"></span></h3>
+        <p>After running the serial conversion, it can be well observed that execution is creating 'lag' and blocking
+            the master thread. To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
+            master thread so the user can continue to interact with the website. We will achieve this by utilizing
+            JavaScript's Web Workers.</p>
+    </div>
+
+
+
+
+    <!-- Parallel Image -->
+    <div class="container-fluid mt-5">
+        <h1>Parallel Conversion</h1>
+        <div class="row">
+            <div class="col-6">
+                <h3>Initial Image</h3>
+                <div style="overflow: scroll; height: 720px;">
+                    <img src="wallpaper.jpg" />
+                </div>
+            </div>
+            <div class="col-6">
+                <h3>Sobel Filtered Image</h3>
+                <div style="overflow: scroll; height: 720px;">
+                    <canvas id="parallelCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="mt-5 d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" onclick="performParallelSobel()">
+                <h4>Filter Image</h4>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h3>Results: <span id="parallelResults"></span></h3>
+        <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
+            version. We define the number of threads to web workers to create and break our image into horizontal chunks
+            (height/# of workers). We then generate the worker, and after all the workers are complete, we patch
+            everything together. If you compare the products of both filter methods, you will notice that the Parallel
+            version has a bit of noise, and the edges are more defined (Ex. The Sun).</p>
+    </div>
+
+
+
+
+
+    <!-- jQuery and JS bundle w/ Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="./scripts/dedicated.js"></script>
+    <script src="./scripts/sobel.js"></script>
 </body>
+
 </html>
