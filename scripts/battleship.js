@@ -16,7 +16,7 @@ let maxHitCount;
 let enemyHitCount = 0;
 let myHitCount = 0;
 
-const worker = new SharedWorker('/sharedWorker.js');
+const worker = new SharedWorker('./scripts/sharedWorker.js');
 worker.port.__originalPostMessage__ = worker.port.postMessage;
 worker.port.postMessage = function(data) {
 	return worker.port.__originalPostMessage__({ source: playerId, ...data });

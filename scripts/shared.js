@@ -26,5 +26,5 @@ function loadData() {
 
 function startPlayer(id) {
     let playerName = document.getElementById(`playerName-${id}`).value;
-    window.open(`/battleship.html?id=${id}&name=${playerName}`, `Battleship - Player ${id}`, "menubar=0");
+    window.open(`./battleship.html?id=${id}&name=${playerName}`, `Battleship - Player ${id}`, "menubar=0");
 }
