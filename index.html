@@ -65,7 +65,8 @@
     <!-- Introduction -->
     <div class="container">
         <p>
-            In this example, we are going to apply a Sobel filter to the following 4K image. A Sobel filter is used in
+            In this example, we are going to apply a Sobel filter to the following 6K (6000 * 3000) image. A Sobel
+            filter is used in
             image processing and computer vision, where an image is generated with the edges emphasized of the input
             image. Firstly, we will execute the serial code - then we are going to perform the same operation using
             multiple web workers set by an input. When running the serial version, try interacting with the DOM!
@@ -76,13 +77,13 @@
     <div class="container-fluid">
         <h1>Serial Conversion</h1>
         <div class="row">
-            <div class="col-6">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <h3>Initial Image</h3>
                 <div style="overflow: scroll; height: 720px;">
                     <img id="imageSource" src="wallpaper.jpg" />
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <h3>Sobel Filtered Image</h3>
                 <div style="overflow: scroll; height: 720px;">
                     <canvas id="serialCanvas"></canvas>
@@ -105,19 +106,17 @@
     </div>
 
 
-
-
     <!-- Parallel Image -->
     <div class="container-fluid mt-5">
         <h1>Parallel Conversion</h1>
         <div class="row">
-            <div class="col-6">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <h3>Initial Image</h3>
                 <div style="overflow: scroll; height: 720px;">
                     <img src="wallpaper.jpg" />
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                 <h3>Sobel Filtered Image</h3>
                 <div style="overflow: scroll; height: 720px;">
                     <canvas id="parallelCanvas"></canvas>
@@ -125,19 +124,29 @@
             </div>
         </div>
         <div class="mt-5 d-flex justify-content-center">
+            <div class="mr-5">
+                <label for="slider">Select the # of Logical Processors: <span id="sliderNum">1</span></label>
+                <input type="range" class="custom-range" id="slider" min="1" step="1"
+                    oninput="updateSliderDisplay(this.value)">
+            </div>
             <button type="button" class="btn btn-primary" onclick="performParallelSobel()">
                 <h4>Filter Image</h4>
             </button>
         </div>
     </div>
 
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <h3>Results: <span id="parallelResults"></span></h3>
         <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
             version. We define the number of threads to web workers to create and break our image into horizontal chunks
-            (height/# of workers). We then generate the worker, and after all the workers are complete, we patch
-            everything together. If you compare the products of both filter methods, you will notice that the Parallel
-            version has a bit of noise, and the edges are more defined (Ex. The Sun).</p>
+            (height/# of workers). We then generate the worker, and wait for all of the workers to complete before
+            patching everything together. Below you will be able to compare the execution time per processor. You can
+            change the # of processors used using the slider.</p>
+
+        <h3 class="mt-5">Execution time per processor</h3>
+        <div class="chart-wrapper">
+            <canvas id="myChart"></canvas>
+        </div>
     </div>
 
 

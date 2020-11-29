@@ -11,6 +11,7 @@ let serialCanvas;
 let parallelCanvas;
 let barGraph;
 let slider;
+let sliderNum;
 let serialResults;
 let parallelResults;
 
@@ -26,6 +27,11 @@ function loadData() {
     parallelCanvas = document.getElementById('parallelCanvas');
     serialResults = document.getElementById('serialResults');
     parallelResults = document.getElementById('parallelResults');
+    slider = document.getElementById('slider');
+    sliderNum = document.getElementById('sliderNum')
+    slider.value = 2;
+    slider.max = window.navigator.hardwareConcurrency;
+    sliderNum.textContent = slider.value;
 
     // Copy image onto canvas (serial)
     let context = serialCanvas.getContext("2d");
@@ -42,54 +48,176 @@ function loadData() {
 
 
 
+
+
+/**
+ * 
+ * Chart
+ * 
+ */
+const chart = new Chart("myChart", {
+    type: 'bar',
+    data: {
+        labels: [],
+        datasets: []
+    },
+    options: {
+        events: false,
+        tooltips: {
+            enabled: false
+        },
+        hover: {
+            animationDuration: 0
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Time taken (ms)'
+                }
+            }],
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: '# Logical Processors Used'
+                }
+            }]
+        },
+        animation: {
+            onComplete: function () {
+                let chartInstance = this.chart,
+                    ctx = chartInstance.ctx;
+                ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+
+                this.data.datasets.forEach(function (dataset, i) {
+                    var meta = chartInstance.controller.getDatasetMeta(i);
+                    meta.data.forEach(function (bar, index) {
+                        var data = dataset.data[index];
+                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                    });
+                });
+            }
+        }
+    }
+});
+
+
+
+// Add data to chart
+function updateChart(processors = 1, difference, backgroundColor, label) {
+
+    // Create a dataset with parameter value
+    const dataset = {
+        label,
+        backgroundColor,
+        data: [difference],
+        processors,
+    };
+
+    // No datasets exist
+    if (chart.data.datasets.length === 0) {
+        chart.data.datasets.push(dataset);
+    } else {
+        let index = 0;
+        for (let i = 0; i < chart.data.datasets.length; i++) {
+            if (chart.data.datasets[i].processors === dataset.processors) {
+                index = i;
+            }
+        }
+
+        if (index === 0) {
+            chart.data.datasets.push(dataset);
+        }
+    }
+
+    // Order dataset
+
+    chart.update();
+}
+
+
+
+
+
+
+
+
+// On slider input, update the number displayed
+function updateSliderDisplay(value) {
+    sliderNum.textContent = value;
+}
+
+
+
+// Perform Serial Sobel 
 function performSerialSobel() {
 
-    let start = window.performance.now();
-
+    // Reset image
     const tempContext = serialCanvas.getContext("2d");
-    var canvasData = tempContext.getImageData(0, 0, serialCanvas.width, serialCanvas.height);
+    tempContext.drawImage(image, 0, 0);
+
+    const start = window.performance.now();
+
+    let canvasData = tempContext.getImageData(0, 0, serialCanvas.width, serialCanvas.height);
 
     const sobelData = Sobel(canvasData);
     const sobelImageData = sobelData.toImageData();
 
     tempContext.putImageData(sobelImageData, 0, 0);
 
-    let end = window.performance.now();
+    const end = window.performance.now();
     const difference = `${end-start} ms`;
     serialResults.textContent = difference;
     console.log(`Execution time: ${end-start} ms`);
+    updateChart(1, end - start, '#ffb1c1', 'Serial (1)');
 }
 
 
 
 function performParallelSobel() {
+    // Reset image
+    const tempContext = parallelCanvas.getContext("2d");
+    tempContext.drawImage(image, 0, 0);
+
+    // Record starting time
     let start = window.performance.now();
     let end;
-    const numOfWorkers = 8;
+    const numOfWorkers = slider.value;
     let finished = 0;
-    const blockSize = parallelCanvas.height / numOfWorkers; // Height of the picture chunck for every worker
-    const tempContext = parallelCanvas.getContext("2d");
+
+    // Height of the picture chunck for every worker
+    const blockSize = parallelCanvas.height / numOfWorkers;
 
     // Function called when a job is finished
-    var onWorkEnded = function (e) {
+    let onWorkEnded = function (e) {
         // Data is retrieved using a memory clone operation
         const sobelData = e.data.result;
         const index = e.data.index;
 
         // Copying back canvas data to canvas
-        var sobelImageData = Sobel.toImageData(sobelData, parallelCanvas.width, blockSize);
+        let sobelImageData = Sobel.toImageData(sobelData, parallelCanvas.width, blockSize);
         tempContext.putImageData(sobelImageData, 0, blockSize * index);
 
         finished++;
 
         if (finished == numOfWorkers) {
+            // Calculate Time difference
             end = window.performance.now();
             const difference = `${end-start} ms`;
             parallelResults.textContent = difference;
             console.log(`Execution time: ${end-start} ms`);
+            const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            updateChart(numOfWorkers, end - start, color, `Parallel (${numOfWorkers})`);
         }
     };
-
 
     // Launch n numbers of workers
     for (let i = 0; i < numOfWorkers; i++) {
@@ -99,6 +227,7 @@ function performParallelSobel() {
         // Get Image chunk
         const canvasData = tempContext.getImageData(0, blockSize * i, parallelCanvas.width, blockSize);
 
+        // Start Working
         worker.postMessage({
             data: canvasData,
             index: i,
