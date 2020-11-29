@@ -6,6 +6,7 @@ $(function () {
 
 // DOM Elements
 let hardwareConcurrency;
+let mainContent;
 let image;
 let serialCanvas;
 let parallelCanvas;
@@ -17,6 +18,15 @@ let parallelResults;
 
 // Assign values on load
 function loadData() {
+    mainContent =  document.getElementById('MainContent');
+
+    // Check compatibility
+    if (!window.Worker) {
+        let msg = 'Web Worker API is not supported. Consider updating or using another browser.';
+        mainContent.innerHTML = `<div class="container"><p class="text-center">${msg}</p></div>`;
+        throw Error(msg);
+    }
+
     // Display the hardware concurrency
     hardwareConcurrency = document.getElementById("hardwareConcurrency");
     hardwareConcurrency.textContent = window.navigator.hardwareConcurrency;

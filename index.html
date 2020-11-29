@@ -16,7 +16,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <!-- Navbar content -->
-        <a class="navbar-brand" href="./index.html">DPS921 Assignment</a>
+        <a class="navbar-brand" href="./index.html">DPS921 - All-nighers</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -62,83 +62,85 @@
         </div>
     </div>
 
-    <!-- Introduction -->
-    <div class="container">
-        <p>
-            In this example, we are going to apply a Sobel filter to the following 4K image. A Sobel filter is used in
-            image processing and computer vision, where an image is generated with the edges emphasized of the input
-            image. Firstly, we will execute the serial code - then we are going to perform the same operation using
-            multiple web workers set by an input. When running the serial version, try interacting with the DOM!
-        </p>
-    </div>
+    <main id="MainContent">
+        <!-- Introduction -->
+        <div class="container">
+            <p>
+                In this example, we are going to apply a Sobel filter to the following 4K image. A Sobel filter is used in
+                image processing and computer vision, where an image is generated with the edges emphasized of the input
+                image. Firstly, we will execute the serial code - then we are going to perform the same operation using
+                multiple web workers set by an input. When running the serial version, try interacting with the DOM!
+            </p>
+        </div>
 
-    <!-- Serial Image -->
-    <div class="container-fluid">
-        <h1>Serial Conversion</h1>
-        <div class="row">
-            <div class="col-6">
-                <h3>Initial Image</h3>
-                <div style="overflow: scroll; height: 720px;">
-                    <img id="imageSource" src="wallpaper.jpg" />
+        <!-- Serial Image -->
+        <div class="container-fluid">
+            <h1>Serial Conversion</h1>
+            <div class="row">
+                <div class="col-6">
+                    <h3>Initial Image</h3>
+                    <div style="overflow: scroll; height: 720px;">
+                        <img id="imageSource" src="wallpaper.jpg" />
+                    </div>
+                </div>
+                <div class="col-6">
+                    <h3>Sobel Filtered Image</h3>
+                    <div style="overflow: scroll; height: 720px;">
+                        <canvas id="serialCanvas"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-6">
-                <h3>Sobel Filtered Image</h3>
-                <div style="overflow: scroll; height: 720px;">
-                    <canvas id="serialCanvas"></canvas>
-                </div>
+            <div class="mt-5 d-flex justify-content-center">
+                <button type="button" class="btn btn-primary" onclick="performSerialSobel()">
+                    <h4>Filter Image</h4>
+                </button>
             </div>
         </div>
-        <div class="mt-5 d-flex justify-content-center">
-            <button type="button" class="btn btn-primary" onclick="performSerialSobel()">
-                <h4>Filter Image</h4>
-            </button>
+    
+        <div class="container mt-5">
+            <h3>Results: <span id="serialResults"></span></h3>
+            <p>After running the serial conversion, it can be well observed that execution is creating 'lag' and blocking
+                the master thread. To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
+                master thread so the user can continue to interact with the website. We will achieve this by utilizing
+                JavaScript's Web Workers.</p>
         </div>
-    </div>
-
-    <div class="container mt-5">
-        <h3>Results: <span id="serialResults"></span></h3>
-        <p>After running the serial conversion, it can be well observed that execution is creating 'lag' and blocking
-            the master thread. To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
-            master thread so the user can continue to interact with the website. We will achieve this by utilizing
-            JavaScript's Web Workers.</p>
-    </div>
-
-
-
-
-    <!-- Parallel Image -->
-    <div class="container-fluid mt-5">
-        <h1>Parallel Conversion</h1>
-        <div class="row">
-            <div class="col-6">
-                <h3>Initial Image</h3>
-                <div style="overflow: scroll; height: 720px;">
-                    <img src="wallpaper.jpg" />
+    
+    
+    
+    
+        <!-- Parallel Image -->
+        <div class="container-fluid mt-5">
+            <h1>Parallel Conversion</h1>
+            <div class="row">
+                <div class="col-6">
+                    <h3>Initial Image</h3>
+                    <div style="overflow: scroll; height: 720px;">
+                        <img src="wallpaper.jpg" />
+                    </div>
+                </div>
+                <div class="col-6">
+                    <h3>Sobel Filtered Image</h3>
+                    <div style="overflow: scroll; height: 720px;">
+                        <canvas id="parallelCanvas"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-6">
-                <h3>Sobel Filtered Image</h3>
-                <div style="overflow: scroll; height: 720px;">
-                    <canvas id="parallelCanvas"></canvas>
-                </div>
+            <div class="mt-5 d-flex justify-content-center">
+                <button type="button" class="btn btn-primary" onclick="performParallelSobel()">
+                    <h4>Filter Image</h4>
+                </button>
             </div>
         </div>
-        <div class="mt-5 d-flex justify-content-center">
-            <button type="button" class="btn btn-primary" onclick="performParallelSobel()">
-                <h4>Filter Image</h4>
-            </button>
+    
+        <div class="container mt-5">
+            <h3>Results: <span id="parallelResults"></span></h3>
+            <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
+                version. We define the number of threads to web workers to create and break our image into horizontal chunks
+                (height/# of workers). We then generate the worker, and after all the workers are complete, we patch
+                everything together. If you compare the products of both filter methods, you will notice that the Parallel
+                version has a bit of noise, and the edges are more defined (Ex. The Sun).</p>
         </div>
-    </div>
-
-    <div class="container mt-5">
-        <h3>Results: <span id="parallelResults"></span></h3>
-        <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
-            version. We define the number of threads to web workers to create and break our image into horizontal chunks
-            (height/# of workers). We then generate the worker, and after all the workers are complete, we patch
-            everything together. If you compare the products of both filter methods, you will notice that the Parallel
-            version has a bit of noise, and the edges are more defined (Ex. The Sun).</p>
-    </div>
+    </main>
 
 
 
