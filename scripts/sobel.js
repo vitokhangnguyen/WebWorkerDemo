@@ -1,3 +1,9 @@
+/**
+ * JavaScript Sobel Filtering Algorithm retrieved from:
+ * https://github.com/miguelmota/sobel
+ * 
+ */
+
 (function(root) {
     'use strict';
   
