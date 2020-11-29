@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	playerTitleElem.textContent = playerName && playerName.trim() !== '' ? `Player ${playerId} - ${playerName}` : `Player ${playerId}`;
 });
 
-let gameBoard;
+let gameReady;
+let myGameboard;
 let enemyGameboard;
 let maxHitCount;
 let enemyHitCount = 0;
@@ -27,23 +28,28 @@ worker.port.onmessage = function(event) {
 
 	switch (event.data.type) {
 		case 'begin':
-			setupGameBoard(event.data.gameBoard);
+			setupGameBoard(event.data);
+			break;
+		case 'ready':
+			onGameReady();
 			break;
 		case 'fire':
 			onBeingFiredAt(event.data);
 			break;
 		case 'hit':
 			onHitEnemyShip(event.data);
+			break;
 	}
 };
 
-function setupGameBoard(data) {
-	gameBoard = data;
+function setupGameBoard({ ready, gameBoard }) {
+	gameReady = ready;
 	enemyGameboard = [];
-	maxHitCount = gameBoard.reduce((prevRow, curRow) => prevRow += curRow.reduce((prev, cur) => prev += cur, 0), 0);
+	myGameboard = gameBoard;
+	maxHitCount = myGameboard.reduce((prevRow, curRow) => prevRow += curRow.reduce((prev, cur) => prev += cur, 0), 0);
 
-	let rows = gameBoard.length;
-	let cols = gameBoard[0].length;
+	let rows = myGameboard.length;
+	let cols = myGameboard[0].length;
 
 	let gameBoardContainer = document.getElementById("my-gameboard");
 	for (let i = 0; i < cols; i++) {
@@ -57,7 +63,7 @@ function setupGameBoard(data) {
 			let leftPosition = i * squareSize;			
 			square.style.top = topPosition + 'px';
 			square.style.left = leftPosition + 'px';	
-			if (gameBoard[j][i] === 1) {
+			if (myGameboard[j][i] === 1) {
 				square.style.backgroundColor = '#777';
 			}
 			enemyGameboard[i].push(0);
@@ -65,7 +71,6 @@ function setupGameBoard(data) {
 	}
 	
 	gameBoardContainer = document.getElementById("enemy-gameboard");
-	gameBoardContainer.onclick = fireTorpedo;
 	for (let i = 0; i < cols; i++) {
 		for (let j = 0; j < rows; j++) {
 			let square = document.createElement("div");
@@ -78,16 +83,26 @@ function setupGameBoard(data) {
 			square.style.left = leftPosition + 'px';
 		}
 	}
+
+	if (gameReady) {
+		gameBoardContainer.onclick = fireTorpedo;
+	} else {
+		lock_enemy_board('Waiting for opponent');
+	}
 }
 
-function fireTorpedo(evemt) {
-	// if item clicked (e.target) is not the parent element on which the event listener was set (e.currentTarget)
-	if (evemt.target !== evemt.currentTarget) {
-        // extract row and column # from the HTML element's id
-		let row = evemt.target.id.substring(1,2);
-		let col = evemt.target.id.substring(2,3);
+function onGameReady() {
+	unlock_enemy_board();
+}
 
-		if (enemyGameboard[row][col] === 2) {
+function fireTorpedo(event) {
+	// if item clicked (e.target) is not the parent element on which the event listener was set (e.currentTarget)
+	if (event.target !== event.currentTarget) {
+        // extract row and column # from the HTML element's id
+		let row = event.target.id.substring(1,2);
+		let col = event.target.id.substring(2,3);
+
+		if (enemyGameboard[row][col] !== 0) {
 			resultPopupMegElem.textContent = "You already fired at this position.";
 			$('#resultPopup').modal('show');
 		} else {
@@ -95,18 +110,20 @@ function fireTorpedo(evemt) {
 			targetedSquare.style.background = '#003D7A';
 			enemyGameboard[row][col] = 2;
 			worker.port.postMessage({ type: 'fire', row, col });
+			lock_enemy_board(`Waiting for opponent's move...`);
 		}
     }
-	evemt.stopPropagation();
+	event.stopPropagation();
 }
 
 let resultPopupMegElem = document.querySelector('#resultPopup').getElementsByClassName('modal-message')[0];
 
 function onBeingFiredAt({ row, col }) {
 	let targetedSquare = document.getElementById(`m${row}${col}`);
-	if (gameBoard[row][col] == 1) {
+	unlock_enemy_board();
+	if (myGameboard[row][col] == 1) {
 		targetedSquare.style.backgroundColor = '#222';
-		gameBoard[row][col] = 4;
+		myGameboard[row][col] = 4;
 		worker.port.postMessage({ type: 'hit', row, col });
 		myHitCount++;
 		if (myHitCount === maxHitCount) {
@@ -119,10 +136,29 @@ function onBeingFiredAt({ row, col }) {
 function onHitEnemyShip({ row, col }) {
 	let targetedSquare = document.getElementById(`e${row}${col}`);
 	targetedSquare.style.backgroundColor = 'red';
-	gameBoard[row][col] = 3;
+	enemyGameboard[row][col] = 3;
 	enemyHitCount++;
 	if (enemyHitCount === maxHitCount) {
 		resultPopupMegElem.textContent = "All enemy battleships have been defeated. You won!";
 		$("#resultPopup").modal('show');
 	}
+}
+
+function lock_enemy_board(message) {
+	let gameBoardContainer = document.getElementById("enemy-gameboard");
+	gameBoardContainer.onclick = null;
+	let waitingMsgElem = document.createElement('p');
+	waitingMsgElem.id = 'waitingMessage';
+	waitingMsgElem.textContent = message;
+	gameBoardContainer.appendChild(waitingMsgElem);
+	gameBoardContainer.style.opacity = 0.75;
+}
+
+function unlock_enemy_board() {
+	let gameBoardContainer = document.getElementById("enemy-gameboard");
+	gameBoardContainer.style.opacity = 1;
+	if (gameBoardContainer.lastElementChild.id === 'waitingMessage') {
+		gameBoardContainer.lastElementChild.remove();
+	};
+	gameBoardContainer.onclick = fireTorpedo;
 }

@@ -90,19 +90,11 @@
                         <canvas id="serialCanvas"></canvas>
                     </div>
                 </div>
-                <div class="mt-5 d-flex justify-content-center">
-                    <button type="button" class="btn btn-primary" onclick="performSerialSobel()">
-                        <h4>Filter Image</h4>
-                    </button>
-                </div>
             </div>
-        
-            <div class="container mt-5">
-                <h3>Results: <span id="serialResults"></span></h3>
-                <p>After running the serial conversion, it can be well observed that execution is creating 'lag' and blocking
-                    the master thread. To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
-                    master thread so the user can continue to interact with the website. We will achieve this by utilizing
-                    JavaScript's Web Workers.</p>
+            <div class="mt-5 d-flex justify-content-center">
+                <button type="button" class="btn btn-primary" onclick="performSerialSobel()">
+                    <h4>Filter Image</h4>
+                </button>
             </div>
         </div>
 
@@ -130,11 +122,6 @@
                     <div style="overflow: scroll; height: 720px;">
                         <canvas id="parallelCanvas"></canvas>
                     </div>
-                </div>
-                <div class="mt-5 d-flex justify-content-center">
-                    <button type="button" class="btn btn-primary" onclick="performParallelSobel()">
-                        <h4>Filter Image</h4>
-                    </button>
                 </div>
             </div>
             <div class="mt-5 d-flex justify-content-center">

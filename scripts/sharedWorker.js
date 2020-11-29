@@ -49,10 +49,23 @@ let allGameBoards = [
         [0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,1,1,1],
     ],
+    [
+        [0,0,0,0,0,0,0,0,0,0],
+        [1,1,1,1,1,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,1,0,0,0,0],
+        [0,0,0,1,0,1,0,0,0,0],
+        [0,0,0,1,0,1,0,0,0,0],
+        [0,0,0,0,0,1,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [1,1,1,0,0,0,0,1,1,1],
+        [0,0,0,0,0,0,0,0,0,0],
+    ],
 ];
 let lastRandomBoardIndex;
 
 let allPorts = [];
+let gameReady;
 
 onconnect = function(connectEvent) {
     let port = connectEvent.ports[0];
@@ -64,6 +77,12 @@ onconnect = function(connectEvent) {
         randomBoardIndex = Math.floor(Math.random() * allGameBoards.length);
     }
     lastRandomBoardIndex = randomBoardIndex;
-    port.postMessage({ type: 'begin', gameBoard: allGameBoards[randomBoardIndex] });
+    port.postMessage({ type: 'begin', ready: allPorts.length > 0, gameBoard: allGameBoards[randomBoardIndex] });
+    if (!gameReady) {
+        gameReady = allPorts.length > 0;
+        if (gameReady) {
+            allPorts.forEach(p => p.postMessage({ type: 'ready' }));
+        }
+    }
     allPorts.push(port);
 }
