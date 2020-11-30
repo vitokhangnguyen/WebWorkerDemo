@@ -16,7 +16,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <!-- Navbar content -->
-        <a class="navbar-brand" href="./index.html">DPS921 - All-nighers</a>
+        <a class="navbar-brand mr-5" href="./index.html">DPS921 - All-nighters</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -29,16 +29,16 @@
                 <li class="nav-item">
                     <a class="nav-link" href="./shared.html">Shared Workers</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="./libraries.html">Parallel.js</a>
-                </li>
+                </li> -->
             </ul>
         </div>
     </nav>
 
 
     <!-- Header -->
-    <div class="jumbotron jumbotron-fluid">
+    <div class="jumbotron jumbotron-fluid p-4">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-8">
@@ -46,7 +46,10 @@
                     <h1 class="display-3">Dedicated Workers</h1>
                     <p class="lead">Workers are useful for allowing your code to perform CPU intensive calculations
                         without blocking or freezing the main thread from executing other JavaScript codes.
-                        <br>A dedicated workeris only accessible by the script that called it.</p>
+                    </p>
+                    <p class="lead">
+                        A dedicated workeris only accessible by the script that called it.
+                    </p>
                 </div>
                 <!-- Concurrency Card -->
                 <div class="col-4 d-flex justify-content-center">
@@ -138,11 +141,13 @@
 
         <div class="container mt-5 mb-5">
             <h3>Results: <span id="parallelResults"></span></h3>
-            <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
+            <p>
+                The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
                 version. We define the number of threads to web workers to create and break our image into horizontal chunks
                 (height/# of workers). We then generate the worker, and wait for all of the workers to complete before
                 patching everything together. Below you will be able to compare the execution time per processor. You can
-                change the # of processors used using the slider.</p>
+                change the # of processors used using the slider.
+            </p>
 
             <h3 class="mt-5">Execution time per processor</h3>
             <div class="chart-wrapper">

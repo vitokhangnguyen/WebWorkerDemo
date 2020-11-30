@@ -117,7 +117,6 @@ function fireTorpedo(event) {
 }
 
 let resultPopupMegElem = document.querySelector('#resultPopup').getElementsByClassName('modal-message')[0];
-
 function onBeingFiredAt({ row, col }) {
 	let targetedSquare = document.getElementById(`m${row}${col}`);
 	unlock_enemy_board();

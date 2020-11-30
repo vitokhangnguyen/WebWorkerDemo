@@ -15,7 +15,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <!-- Navbar content -->
-        <a class="navbar-brand" href="./index.html">DPS921 - All-nighters</a>
+        <a class="navbar-brand mr-5" href="./index.html">DPS921 - All-nighters</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -28,22 +28,33 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="./shared.html">Shared Workers</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="./libraries.html">Parallel.js</a>
-                </li>
+                </li> -->
             </ul>
         </div>
     </nav>
 
 
     <!-- Header -->
-    <div class="jumbotron jumbotron-fluid">
+    <div class="jumbotron jumbotron-fluid p-4">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-8">
                     <!-- Page Description -->
                     <h1 class="display-3">Shared Workers</h1>
-                    <p class="lead">What are shared workers?</p>
+                    <p class="lead">
+                        Shared Workers can also run computationally heavy tasks in background threads,
+                        to improve JavaScript execution time and user experience, as Dedicated Workers.
+                    </p>
+                    <p class="lead">
+                        However, as opposed to Dedicated Workers, Shared Workers can be accessible from multiple scripts
+                        across the site in the same browser. That includes different tabs, windows, iframes and other workers.
+                        The worker's resources (data scope and processing power) are also shared among all accessors.
+                    </p>
+                    <p class="lead mb-0">
+                        This allows communication between 2 or more main threads through a shared worker.
+                    </p>
                 </div>
                 <!-- Concurrency Card -->
                 <div class="col-4 d-flex justify-content-center">
@@ -63,11 +74,11 @@
         <!-- Introduction -->
         <div class="container">
             <p>
-                Bla... bla... bla...
+                The following demo is a 2-player game on 2 browser windows that fully works on the client-side without any server.
             </p>
         </div>
         <div class="container">
-            <h1>Let's play battleship!</h1>
+            <h1 class="mb-4">Battleships</h1>
             <form>
                 <div class="form-group">
                     <label class="label">Player 1:</label>
