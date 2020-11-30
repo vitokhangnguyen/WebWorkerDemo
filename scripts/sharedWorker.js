@@ -12,7 +12,7 @@
  * 3 - hit
  * 4 - sunken ship
  */
-let allGameBoards = [
+const allGameBoards = [
     [
         [0,0,0,1,1,1,1,0,0,0],
         [0,0,0,0,0,0,0,0,0,0],
@@ -62,27 +62,36 @@ let allGameBoards = [
         [0,0,0,0,0,0,0,0,0,0],
     ],
 ];
+
 let lastRandomBoardIndex;
 
-let allPorts = [];
-let gameReady;
-
-onconnect = function(connectEvent) {
-    let port = connectEvent.ports[0];
-    port.onmessage = function(messageEvent) {
-        allPorts.forEach(p => p.postMessage(messageEvent.data));
-    };
+function getRandomGameboard() {
     let randomBoardIndex = lastRandomBoardIndex;
     while (lastRandomBoardIndex === randomBoardIndex) {
         randomBoardIndex = Math.floor(Math.random() * allGameBoards.length);
     }
     lastRandomBoardIndex = randomBoardIndex;
-    port.postMessage({ type: 'begin', ready: allPorts.length > 0, gameBoard: allGameBoards[randomBoardIndex] });
+    return allGameBoards[randomBoardIndex];
+}
+
+let gameReady;
+let allPorts = [];
+
+function checkAndAlertWhenGameReady() {
     if (!gameReady) {
         gameReady = allPorts.length > 0;
         if (gameReady) {
             allPorts.forEach(p => p.postMessage({ type: 'ready' }));
         }
     }
+}
+
+onconnect = function(connectEvent) {
+    let port = connectEvent.ports[0];
+    port.onmessage = function(messageEvent) {
+        allPorts.forEach(p => p.postMessage(messageEvent.data));
+    };
+    port.postMessage({ type: 'begin', ready: allPorts.length > 0, gameBoard: getRandomGameboard() });
+    checkAndAlertWhenGameReady();
     allPorts.push(port);
 }

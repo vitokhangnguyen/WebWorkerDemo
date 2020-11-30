@@ -1,8 +1,8 @@
+// Get player ID and name from URL query params
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.keys().next().done) {
 	window.close();
 }
-
 const playerId = urlParams.get('id');
 const playerName = urlParams.get('name');
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,6 +18,8 @@ let enemyHitCount = 0;
 let myHitCount = 0;
 
 const worker = new SharedWorker('./scripts/sharedWorker.js');
+
+// Send source with any message
 worker.port.__originalPostMessage__ = worker.port.postMessage;
 worker.port.postMessage = function(data) {
 	return worker.port.__originalPostMessage__({ source: playerId, ...data });
