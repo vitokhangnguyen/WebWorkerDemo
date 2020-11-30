@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let gameReady;
 let myGameboard;
 let enemyGameboard;
+let resultPopupMegElem;
 let maxHitCount;
 let enemyHitCount = 0;
 let myHitCount = 0;
@@ -91,6 +92,8 @@ function setupGameBoard({ ready, gameBoard }) {
 	} else {
 		lock_enemy_board('Waiting for opponent');
 	}
+
+	resultPopupMegElem = document.querySelector('#resultPopup').getElementsByClassName('modal-message')[0];
 }
 
 function onGameReady() {
@@ -118,7 +121,6 @@ function fireTorpedo(event) {
 	event.stopPropagation();
 }
 
-let resultPopupMegElem = document.querySelector('#resultPopup').getElementsByClassName('modal-message')[0];
 function onBeingFiredAt({ row, col }) {
 	let targetedSquare = document.getElementById(`m${row}${col}`);
 	unlock_enemy_board();
