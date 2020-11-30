@@ -149,6 +149,11 @@ function updateChart(processors = 1, difference, backgroundColor, label) {
     }
 
     // Order dataset
+    chart.data.datasets.sort((dataset1, dataset2) => {
+        if (dataset1.label.includes('Serial')) return -1;
+        if (dataset2.label.includes('Serial')) return 1;
+        return dataset1.processors - dataset2.processors;
+    });
 
     chart.update();
 }
