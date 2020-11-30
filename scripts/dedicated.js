@@ -19,7 +19,7 @@ let parallelResults;
 
 // Assign values on load
 function loadData() {
-    mainContent =  document.getElementById('MainContent');
+    mainContent = document.getElementById('MainContent');
 
     // Check compatibility
     if (!window.Worker) {
@@ -162,9 +162,6 @@ function updateChart(processors = 1, difference, backgroundColor, label) {
 
 
 
-
-
-
 // On slider input, update the number displayed
 function updateSliderDisplay(value) {
     sliderNum.textContent = value;
@@ -202,50 +199,54 @@ function performParallelSobel() {
     const tempContext = parallelCanvas.getContext("2d");
     tempContext.drawImage(image, 0, 0);
 
-    // Record starting time
-    let start = window.performance.now();
-    let end;
-    const numOfWorkers = slider.value;
-    let finished = 0;
+    // Check if web workers are compatible (All browsers that follow HTML5 standards are compatible)
+    if (window.Worker) {
 
-    // Height of the picture chunck for every worker
-    const blockSize = parallelCanvas.height / numOfWorkers;
+        // Record starting time
+        let start = window.performance.now();
+        let end;
+        const numOfWorkers = slider.value;
+        let finished = 0;
 
-    // Function called when a job is finished
-    let onWorkEnded = function (e) {
-        // Data is retrieved using a memory clone operation
-        const sobelData = e.data.result;
-        const index = e.data.index;
+        // Height of the picture chunck for every worker
+        const blockSize = parallelCanvas.height / numOfWorkers;
 
-        // Copying back canvas data to canvas
-        let sobelImageData = Sobel.toImageData(sobelData, parallelCanvas.width, blockSize);
-        tempContext.putImageData(sobelImageData, 0, blockSize * index);
+        // Function called when a worker has finished
+        let onWorkEnded = function (e) {
+            // Data is retrieved using a memory clone operation
+            const sobelData = e.data.result;
+            const index = e.data.index;
 
-        finished++;
+            // Copying back canvas data to canvas
+            let sobelImageData = Sobel.toImageData(sobelData, parallelCanvas.width, blockSize);
+            tempContext.putImageData(sobelImageData, 0, blockSize * index);
 
-        if (finished == numOfWorkers) {
-            // Calculate Time difference
-            end = window.performance.now();
-            const difference = `${end-start} ms`;
-            parallelResults.textContent = difference;
-            console.log(`Execution time: ${end-start} ms`);
-            const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-            updateChart(numOfWorkers, end - start, color, `Parallel (${numOfWorkers})`);
+            finished++;
+
+            if (finished == numOfWorkers) {
+                // Calculate Time difference
+                end = window.performance.now();
+                const difference = `${end-start} ms`;
+                parallelResults.textContent = difference;
+                console.log(`Execution time: ${end-start} ms`);
+                const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                updateChart(numOfWorkers, end - start, color, `Parallel (${numOfWorkers})`);
+            }
+        };
+
+        // Launch n numbers of workers
+        for (let i = 0; i < numOfWorkers; i++) {
+            const worker = new Worker('./scripts/dedicatedWorker.js');
+            worker.onmessage = onWorkEnded;
+
+            // Get Image chunk
+            const canvasData = tempContext.getImageData(0, blockSize * i, parallelCanvas.width, blockSize);
+
+            // Start Working
+            worker.postMessage({
+                data: canvasData,
+                index: i,
+            });
         }
-    };
-
-    // Launch n numbers of workers
-    for (let i = 0; i < numOfWorkers; i++) {
-        const worker = new Worker('./scripts/dedicatedWorker.js');
-        worker.onmessage = onWorkEnded;
-
-        // Get Image chunk
-        const canvasData = tempContext.getImageData(0, blockSize * i, parallelCanvas.width, blockSize);
-
-        // Start Working
-        worker.postMessage({
-            data: canvasData,
-            index: i,
-        });
     }
 }
