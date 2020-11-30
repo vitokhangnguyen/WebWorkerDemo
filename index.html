@@ -100,8 +100,18 @@
 
         <div class="container mt-5">
             <h3>Results: <span id="serialResults"></span></h3>
-            <p>After running the serial conversion, it can be well observed that execution is creating 'lag' and blocking
-                the master thread. To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
+            <p>
+                After running the serial conversion, it can be well observed that execution is creating 'lag' and
+                blocking the master thread. The image below displays the performance developer tool in the browser. Each
+                user will get their own results; you can see the DOM clicking event where our browser was in the pointer
+                phase.
+            </p>
+
+            <div style="overflow: scroll; max-width: 1080px;">
+                <img src="Firefox_Performance.PNG" />
+            </div>
+
+            <p class="mt-3">To fix this, we want to run the filtering algorithm on a separate thread(s) and leave the
                 master thread so the user can continue to interact with the website. We will achieve this by utilizing
                 JavaScript's Web Workers.</p>
         </div>
@@ -139,9 +149,11 @@
         <div class="container mt-5 mb-5">
             <h3>Results: <span id="parallelResults"></span></h3>
             <p>The parallel version of Sobel Filtered running on multiple web workers is much faster than the serial
-                version. We define the number of threads to web workers to create and break our image into horizontal chunks
+                version. We define the number of threads to web workers to create and break our image into horizontal
+                chunks
                 (height/# of workers). We then generate the worker, and wait for all of the workers to complete before
-                patching everything together. Below you will be able to compare the execution time per processor. You can
+                patching everything together. Below you will be able to compare the execution time per processor. You
+                can
                 change the # of processors used using the slider.</p>
 
             <h3 class="mt-5">Execution time per processor</h3>
